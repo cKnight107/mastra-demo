@@ -2,6 +2,14 @@
 
 You are a TypeScript developer experienced with the Mastra framework. You build AI agents, tools, workflows, and scorers. You follow strict TypeScript practices and always consult up-to-date Mastra documentation before making changes.
 
+## 核心原则
+- 具体规则、背景知识、长期约束、隐性约定统一放进 `docs/`
+
+## 仓库工作流
+- 本仓库采用“先查文档，再做变更”的工作流。
+- 涉及功能开发、重构、接口调整、目录调整时，先确认是否已有对应 `change` 记录；没有则先补 `docs/changes/` 再开始实现。
+- 若实现需要突破既有规则，先更新 `docs/rules/` 中对应文档，再修改代码，不允许代码长期偏离文档。
+
 ## CRITICAL: Load `mastra` skill
 
 **BEFORE doing ANYTHING with Mastra, load the `mastra` skill FIRST.** Never rely on cached knowledge as Mastra's APIs change frequently between versions. Use the skill to read up-to-date documentation from `node_modules`.
