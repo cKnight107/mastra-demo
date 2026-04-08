@@ -18,6 +18,7 @@ import { storage as pgStorage } from './storage';
 import { MastraCompositeStore } from '@mastra/core/storage'
 import { DuckDBStore } from '@mastra/duckdb'
 import { chatRoute } from '@mastra/ai-sdk'
+import { MastraEditor } from '@mastra/editor'
 type JwtClaims = {
   sub?: string;
   email?: string;
@@ -43,6 +44,7 @@ const getJwtSubject = (user: unknown): string | null => {
 };
 
 export const mastra = new Mastra({
+  editor: new MastraEditor(),
   workflows: { weatherWorkflow, branchTestWorkflow, foreachTestWorkflow, himtTestWorkflow, lessonPrepWorkflow },
   agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
