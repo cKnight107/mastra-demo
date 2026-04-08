@@ -1,4 +1,4 @@
-# mastra-demo
+﻿# mastra-demo
 
 Welcome to your new [Mastra](https://mastra.ai/) project! We're excited to see what you'll build.
 
@@ -44,6 +44,46 @@ gemma4:e4b
 
 如果需要让某个 agent 使用该模型，直接从 `src/mastra/agents/models.ts` 导入并替换对应 `model` 配置即可。
 
+
+## Obsidian 接入
+
+当前项目已新增一个面向短篇小说场景的本地 Obsidian 落库能力，采用“直接写入 vault 目录”的方式接入，不依赖额外 MCP 或 REST API。
+
+### 环境变量
+
+复制 `.env.example` 到 `.env` 后，配置：
+
+```shell
+OBSIDIAN_VAULT_PATH=D:\Obsidian\YourVault
+```
+
+- `OBSIDIAN_VAULT_PATH`: Obsidian vault 根目录的本地绝对路径
+
+### 当前本地配置
+
+当前开发环境已按本机 vault 地址接入：
+
+```shell
+D:\Administrator\Documents\Obsidian Vault
+```
+
+### 新增能力
+
+- 新增 agent：`story-writer-agent`
+- 新增 tool：`saveObsidianStoryTool`
+- 默认落库目录：`小说库/短篇`
+
+### 使用方式
+
+启动开发服务后，可通过 Studio 或聊天路由与 `story-writer-agent` 交互。该 agent 在生成短篇小说成稿后，会默认将 Markdown 笔记保存到 Obsidian vault。
+
+示例提示词：
+
+```text
+写一篇 2000 字左右的悬疑短篇，主角是一名夜班保安，结尾带一点反转，但整体要克制。写完后保存到 Obsidian。
+```
+
+保存后的 Markdown 文件会自动带有 frontmatter，包含标题、状态、题材、文风、摘要和标签，便于在 Obsidian 中继续改稿和管理。
 ## JWT 鉴权
 
 当前仓库保留了 Mastra 官方 `MastraJwtAuth` 的接入代码，但默认仍处于注释状态，当前分支默认不会强制所有 `/api/*` 请求携带 JWT。
@@ -145,3 +185,4 @@ If you're new to AI agents, check out our [course](https://mastra.ai/course) and
 [Mastra Cloud](https://cloud.mastra.ai/) gives you a serverless agent environment with atomic deployments. Access your agents from anywhere and monitor performance. Make sure they don't go off the rails with evals and tracing.
 
 Check out the [deployment guide](https://mastra.ai/docs/deployment/overview) for more details.
+

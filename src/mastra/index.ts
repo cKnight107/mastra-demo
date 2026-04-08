@@ -1,4 +1,4 @@
-import { Mastra } from '@mastra/core/mastra';
+﻿import { Mastra } from '@mastra/core/mastra';
 import { fileURLToPath } from 'node:url';
 import { MASTRA_RESOURCE_ID_KEY } from '@mastra/core/request-context';
 import { PinoLogger } from '@mastra/loggers';
@@ -14,6 +14,7 @@ import { weatherAgent } from './agents/weather-agent';
 import { travelAgent } from './agents/travel-agent';
 import { supervisor } from './agents/team-agent';
 import { lessonPrepAgent } from './agents/lesson-prep-agent';
+import { storyWriterAgent } from './agents/story-writer-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
 import { storage as pgStorage } from './storage';
 import { MastraCompositeStore } from '@mastra/core/storage'
@@ -48,7 +49,7 @@ const getJwtSubject = (user: unknown): string | null => {
 export const mastra = new Mastra({
   editor: new MastraEditor(),
   workflows: { weatherWorkflow, branchTestWorkflow, foreachTestWorkflow, himtTestWorkflow, lessonPrepWorkflow },
-  agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent },
+  agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent, storyWriterAgent },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   server: {
     apiRoutes: [
@@ -131,3 +132,4 @@ export const mastra = new Mastra({
     },
   }),
 });
+
