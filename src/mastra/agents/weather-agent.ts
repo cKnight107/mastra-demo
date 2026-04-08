@@ -1,27 +1,10 @@
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
-import { ModelRouterEmbeddingModel, OpenAICompatibleConfig } from '@mastra/core/llm';
+import { ModelRouterEmbeddingModel } from '@mastra/core/llm';
 import { weatherTool } from '../tools/weather-tool';
 import { scorers } from '../scorers/weather-scorer';
 import { storage, vector } from '../storage';
-
-const qwen35plus: OpenAICompatibleConfig = {
-  id: 'dashscope/qwen3.5-plus',
-  apiKey: process.env.DASHSCOPE_API_KEY,
-  url: process.env.DASHSCOPE_BASE_URL,
-};
-
-const qwen35flash: OpenAICompatibleConfig = {
-  id: 'dashscope/qwen3.5-flash',
-  apiKey: process.env.DASHSCOPE_API_KEY,
-  url: process.env.DASHSCOPE_BASE_URL,
-};
-
-const embeddingModel: OpenAICompatibleConfig = {
-  id: 'dashscope/text-embedding-v4',
-  url: process.env.DASHSCOPE_BASE_URL,
-  apiKey: process.env.DASHSCOPE_API_KEY,
-};
+import { qwen35FlashModel, qwen35PlusModel, textEmbeddingV4Model } from './models';
 
 export const weatherAgent = new Agent({
   id: 'weather-agent',
@@ -41,7 +24,7 @@ export const weatherAgent = new Agent({
       Use the weatherTool to fetch current weather data.
 `,
   description: 'Provides weather information and activity suggestions based on weather conditions',
-  model: qwen35plus,
+  model: qwen35PlusModel,
   tools: { weatherTool },
   scorers: {
     toolCallAppropriateness: {
@@ -69,7 +52,7 @@ export const weatherAgent = new Agent({
   memory: new Memory({
     storage,
     vector,
-    embedder: new ModelRouterEmbeddingModel(embeddingModel),
+    embedder: new ModelRouterEmbeddingModel(textEmbeddingV4Model),
     options: {
       lastMessages: 20,
       workingMemory: {
@@ -85,7 +68,7 @@ export const weatherAgent = new Agent({
 `,
       },
       observationalMemory: {
-        model: qwen35flash,
+        model: qwen35FlashModel,
         scope: 'thread',
       },
       semanticRecall: {

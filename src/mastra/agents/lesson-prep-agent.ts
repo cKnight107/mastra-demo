@@ -1,18 +1,12 @@
 import { Agent } from '@mastra/core/agent';
-import { OpenAICompatibleConfig } from '@mastra/core/llm';
 import { LessonPrepResult, lessonPrepResultSchema } from '../schemas/lesson-prep-schema';
-
-const qwen35plus: OpenAICompatibleConfig = {
-  id: 'dashscope/qwen3.5-plus',
-  apiKey: process.env.DASHSCOPE_API_KEY,
-  url: process.env.DASHSCOPE_BASE_URL,
-};
+import { qwen35PlusModel } from './models';
 
 export const lessonPrepAgent = new Agent<'lesson-prep-agent', Record<string, never>, LessonPrepResult>({
   id: 'lesson-prep-agent',
   name: 'Lesson Prep Agent',
   description: '用于初中数学题目备课分析，结合题图识别、知识点约束与教师讲解建议输出结构化结果',
-  model: qwen35plus,
+  model: qwen35PlusModel,
   instructions: `
 你是一名严谨的初中数学备课分析助手，服务对象是一线数学教师。
 

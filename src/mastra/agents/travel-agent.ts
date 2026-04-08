@@ -1,13 +1,8 @@
 import { Agent } from '@mastra/core/agent';
-import { OpenAICompatibleConfig } from '@mastra/core/llm';
 import { routeCitiesTool } from '../tools/route-cities-tool';
 import { Memory } from '@mastra/memory';
-import { storage, vector } from '../storage';
-const qwen35plus: OpenAICompatibleConfig = {
-  id: 'dashscope/qwen3.5-plus',
-  apiKey: process.env.DASHSCOPE_API_KEY,
-  url: process.env.DASHSCOPE_BASE_URL,
-};
+import { storage } from '../storage';
+import { qwen35PlusModel,qwen36PlusModel } from './models';
 
 export const travelAgent = new Agent({
   id: 'travel-agent',
@@ -25,16 +20,16 @@ export const travelAgent = new Agent({
 
     如果工具返回的城市较少，也要如实说明，不要编造额外城市。
   `,
-  model: qwen35plus,
+  model: qwen36PlusModel,
   tools: { routeCitiesTool },
   memory: new Memory({
-      storage,
-      options: {
-        lastMessages: 20,
-        workingMemory: {
-          enabled: true,
-          scope: 'resource',
-          template: `# User Profile
+    storage,
+    options: {
+      lastMessages: 20,
+      workingMemory: {
+        enabled: true,
+        scope: 'resource',
+        template: `# User Profile
   - Name: 
   - Preferred Language: 
   - Preferred Temperature Unit:
@@ -42,7 +37,7 @@ export const travelAgent = new Agent({
   - Travel Interests:
   - Long-term Preferences:
   `,
-        }
       },
-    }),
+    },
+  }),
 });
