@@ -1,4 +1,5 @@
 import { Mastra } from '@mastra/core/mastra';
+import { fileURLToPath } from 'node:url';
 import { MASTRA_RESOURCE_ID_KEY } from '@mastra/core/request-context';
 import { PinoLogger } from '@mastra/loggers';
 import { Observability, DefaultExporter, CloudExporter, SensitiveDataFilter, SamplingStrategyType } from '@mastra/observability';
@@ -33,6 +34,7 @@ const OBSERVABILITY_REQUEST_CONTEXT_KEYS = [
   'http_method',
   'http_path',
 ] as const;
+const OBSERVABILITY_DUCKDB_PATH = fileURLToPath(new URL('../../.mastra-observability.duckdb', import.meta.url));
 
 const getJwtSubject = (user: unknown): string | null => {
   if (!user || typeof user !== 'object') {
@@ -110,7 +112,9 @@ export const mastra = new Mastra({
     id: 'composite-storage',
     default: pgStorage,
     domains: {
-      observability: await new DuckDBStore().getStore('observability'),
+      observability: await new DuckDBStore({
+        path: OBSERVABILITY_DUCKDB_PATH,
+      }).getStore('observability'),
     },
   }),
   logger: new PinoLogger({

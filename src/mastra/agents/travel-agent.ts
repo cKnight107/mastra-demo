@@ -2,7 +2,7 @@ import { Agent } from '@mastra/core/agent';
 import { routeCitiesTool } from '../tools/route-cities-tool';
 import { Memory } from '@mastra/memory';
 import { storage } from '../storage';
-import { qwen35PlusModel,qwen36PlusModel } from './models';
+import { qwen35PlusModel,qwen36PlusModel,gemma4E4bModel } from './models';
 
 export const travelAgent = new Agent({
   id: 'travel-agent',
@@ -20,7 +20,7 @@ export const travelAgent = new Agent({
 
     如果工具返回的城市较少，也要如实说明，不要编造额外城市。
   `,
-  model: qwen36PlusModel,
+  model: gemma4E4bModel,
   tools: { routeCitiesTool },
   memory: new Memory({
     storage,

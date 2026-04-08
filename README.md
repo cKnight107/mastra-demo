@@ -14,9 +14,41 @@ Open [http://localhost:4111](http://localhost:4111) in your browser to access [M
 
 You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
 
+## 本地模型提供商
+
+当前项目已支持通过 Mastra 的 `OpenAICompatibleConfig` 接入本地 Ollama。
+
+### 环境变量
+
+复制 `.env.example` 到 `.env` 后，可以按需配置：
+
+```shell
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
+```
+
+- `OLLAMA_BASE_URL`: 本地 Ollama 的 OpenAI-compatible 接口地址，默认按本机 `11434` 端口处理
+
+### 已新增模型
+
+项目已在 `src/mastra/agents/models.ts` 中导出：
+
+```ts
+gemma4E4bModel
+```
+
+对应本地模型名：
+
+```shell
+gemma4:e4b
+```
+
+如果需要让某个 agent 使用该模型，直接从 `src/mastra/agents/models.ts` 导入并替换对应 `model` 配置即可。
+
 ## JWT 鉴权
 
-当前项目已经接入 Mastra 官方 `MastraJwtAuth` 鉴权，所有 `/api/*` 请求都需要携带 JWT：
+当前仓库保留了 Mastra 官方 `MastraJwtAuth` 的接入代码，但默认仍处于注释状态，当前分支默认不会强制所有 `/api/*` 请求携带 JWT。
+
+如果你准备重新启用 JWT，可按下面方式配置：
 
 ```shell
 Authorization: Bearer <your-jwt>
@@ -28,6 +60,7 @@ Authorization: Bearer <your-jwt>
 
 ```shell
 DASHSCOPE_API_KEY=your-dashscope-api-key
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
 OPENAI_API_KEY=your-openai-api-key
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mastra_demo
 DATABASE_SSL=false
@@ -35,6 +68,7 @@ MASTRA_JWT_SECRET=replace-with-a-long-random-secret
 ```
 
 - `DASHSCOPE_API_KEY`: 主天气 Agent 使用的推理模型
+- `OLLAMA_BASE_URL`: 本地 Ollama 兼容 OpenAI 的接口地址
 - `OPENAI_API_KEY`: scorer、观察记忆、语义回忆 embedding 使用
 - `DATABASE_URL`: PostgreSQL 连接串，消息历史、工作内存、观察记忆都会落到这里
 - `DATABASE_SSL`: 本地 PostgreSQL 通常设为 `false`，云数据库要求 SSL 时再设为 `true`
@@ -81,7 +115,7 @@ npm run jwt:dev -- user-456 user456@example.com "User 456"
 
 ### 3. 在 Studio 中调试
 
-启动开发服务器后，打开 Studio，进入 `Settings`，在 `Headers` 中添加：
+如果你重新启用了 JWT 鉴权，启动开发服务器后，打开 Studio，进入 `Settings`，在 `Headers` 中添加：
 
 ```shell
 Authorization: Bearer <your-jwt>
@@ -98,7 +132,7 @@ curl -X POST http://localhost:4111/api/agents/weatherAgent/generate \
   }'
 ```
 
-项目会把 JWT 中的 `sub` 绑定到 Mastra 的 `MASTRA_RESOURCE_ID_KEY`，这样线程和记忆数据会按用户隔离。
+重新启用 JWT 后，项目会把 JWT 中的 `sub` 绑定到 Mastra 的 `MASTRA_RESOURCE_ID_KEY`，这样线程和记忆数据会按用户隔离。
 
 ## Learn more
 
