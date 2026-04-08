@@ -1,7 +1,8 @@
 import { Agent } from '@mastra/core/agent';
 import { OpenAICompatibleConfig } from '@mastra/core/llm';
 import { routeCitiesTool } from '../tools/route-cities-tool';
-
+import { Memory } from '@mastra/memory';
+import { storage, vector } from '../storage';
 const qwen35plus: OpenAICompatibleConfig = {
   id: 'dashscope/qwen3.5-plus',
   apiKey: process.env.DASHSCOPE_API_KEY,
@@ -26,4 +27,22 @@ export const travelAgent = new Agent({
   `,
   model: qwen35plus,
   tools: { routeCitiesTool },
+  memory: new Memory({
+      storage,
+      options: {
+        lastMessages: 20,
+        workingMemory: {
+          enabled: true,
+          scope: 'resource',
+          template: `# User Profile
+  - Name: 
+  - Preferred Language: 
+  - Preferred Temperature Unit:
+  - Common Locations: 
+  - Travel Interests:
+  - Long-term Preferences:
+  `,
+        }
+      },
+    }),
 });
