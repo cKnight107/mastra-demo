@@ -14,16 +14,16 @@
 
 ## 待确认
 
-- [ ] 用户显式确认现在进入 Apply 阶段
+- [x] 用户显式确认现在进入 Apply 阶段
 
 ## 实施任务（确认后执行）
 
-- [ ] 安装 Discord 适配器依赖并补充环境变量说明
-- [ ] 为 `travelAgent` 增加 `channels.discord`、DM / `@mention` 和图片输入配置
-- [ ] 根据部署形态确认 `gateway`、`cards`、`threadContext` 配置
-- [ ] 为未来 JWT 恢复预留 Discord webhook 公共路径白名单扩展点
-- [ ] 更新 README 与联调文档，记录 Discord 配置与 webhook 地址
-- [ ] 运行 `npm run build` 验证编译通过
+- [x] 安装 Discord 适配器依赖并补充环境变量说明
+- [x] 为 `travelAgent` 增加 `channels.discord`、DM / `@mention` 和图片输入配置
+- [x] 根据部署形态确认 `gateway`、`cards`、`threadContext` 配置
+- [x] 为未来 JWT 恢复预留 Discord webhook 公共路径白名单扩展点
+- [x] 更新 README 与联调文档，记录 Discord 配置与 webhook 地址
+- [x] 运行 `npm run build` 验证编译通过
 
 ## 进入 Apply 的条件
 
@@ -32,4 +32,4 @@
 - [x] 用户已确认首期需要支持图片附件
 - [x] 用户已确认需要为 JWT 恢复预留口子
 - [x] 用户已确认说明文档需要一并补齐
-- [ ] 用户显式确认现在进入 Apply
+- [x] 用户显式确认现在进入 Apply

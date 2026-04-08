@@ -1,8 +1,15 @@
+import { createDiscordAdapter } from '@chat-adapter/discord';
 import { Agent } from '@mastra/core/agent';
-import { routeCitiesTool } from '../tools/route-cities-tool';
 import { Memory } from '@mastra/memory';
+import { qwen36PlusModel } from './models';
 import { storage } from '../storage';
-import { qwen35PlusModel,qwen36PlusModel } from './models';
+import { routeCitiesTool } from '../tools/route-cities-tool';
+
+// const travelAgentDiscordChannel = {
+//   adapter: createDiscordAdapter(),
+//   gateway: true,
+//   cards: true,
+// } as const;
 
 export const travelAgent = new Agent({
   id: 'travel-agent',
@@ -19,6 +26,10 @@ export const travelAgent = new Agent({
     - 回答使用简洁中文
 
     如果工具返回的城市较少，也要如实说明，不要编造额外城市。
+
+    如果用户上传了图片（例如景点照片、地图截图、车票界面）：
+    - 先结合图片内容理解用户问题，再给出旅行建议
+    - 无法确认图片细节时明确说明不确定点，并继续追问必要信息
   `,
   model: qwen36PlusModel,
   tools: { routeCitiesTool },
@@ -40,4 +51,13 @@ export const travelAgent = new Agent({
       },
     },
   }),
+  // channels: {
+  //   adapters: {
+  //     discord: travelAgentDiscordChannel,
+  //   },
+  //   inlineMedia: ['image/*'],
+  //   threadContext: {
+  //     maxMessages: 10,
+  //   },
+  // },
 });

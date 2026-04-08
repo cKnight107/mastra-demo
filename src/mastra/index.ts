@@ -1,3 +1,5 @@
+// import './network/discord-proxy';
+// import './network/discord-gateway-dns';
 import { Mastra } from '@mastra/core/mastra';
 import { MASTRA_RESOURCE_ID_KEY } from '@mastra/core/request-context';
 import { PinoLogger } from '@mastra/loggers';
@@ -26,7 +28,10 @@ type JwtClaims = {
   picture?: string;
 };
 
-const PUBLIC_API_PATHS = new Set(['/api/openapi.json']);
+export const DISCORD_WEBHOOK_PUBLIC_PATHS = ['/api/agents/travel-agent/channels/discord/webhook'] as const;
+
+// Keep Discord webhook public when JWT auth is re-enabled, otherwise Discord signature validation cannot complete.
+export const AUTH_PUBLIC_API_PATHS = ['/api/openapi.json', ...DISCORD_WEBHOOK_PUBLIC_PATHS] as const;
 const OBSERVABILITY_REQUEST_CONTEXT_KEYS = [
   MASTRA_RESOURCE_ID_KEY,
   'auth_subject',
@@ -56,7 +61,7 @@ export const mastra = new Mastra({
     ],
     // auth: new MastraJwtAuth({
     //   secret: process.env.MASTRA_JWT_SECRET,
-    //   public: ['/api/openapi.json'],
+    //   public: [...AUTH_PUBLIC_API_PATHS],
     //   authorizeUser: async user => getJwtSubject(user) !== null,
     //   mapUser: payload => {
     //     const id = getJwtSubject(payload);
@@ -76,7 +81,7 @@ export const mastra = new Mastra({
     //   {
     //     path: '/api/*',
     //     handler: async (c, next) => {
-    //       if (c.req.method === 'OPTIONS' || PUBLIC_API_PATHS.has(c.req.path)) {
+    //       if (c.req.method === 'OPTIONS' || AUTH_PUBLIC_API_PATHS.includes(c.req.path as (typeof AUTH_PUBLIC_API_PATHS)[number])) {
     //         return next();
     //       }
 

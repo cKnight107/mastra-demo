@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Propose"
+  short_description: "逐轮澄清需求并产出提案阶段 spec/tasks/log 文档"
+  default_prompt: "使用 $spec-propose 先梳理代码现状并逐轮澄清需求，再生成提案阶段的 spec.md、tasks.md 和 log.md，在用户确认前不要开始编码。"
