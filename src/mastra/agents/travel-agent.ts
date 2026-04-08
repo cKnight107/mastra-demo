@@ -2,6 +2,7 @@ import { createDiscordAdapter } from '@chat-adapter/discord';
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { storage } from '../storage';
+import { routeCitiesTool } from '../tools/route-cities-tool';
 import { qwen35PlusModel,qwen36PlusModel,gemma4E4bModel } from './models';
 
 export const travelAgent = new Agent({
