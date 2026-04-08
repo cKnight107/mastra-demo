@@ -7,3 +7,6 @@
 - 外部系统背景
 - 数据模型背景
 - 常见术语解释
+
+## 实现知识
+- Obsidian frontmatter 手写解析至少要兼容本工具生成格式和常见 inline list/object 语法；否则 `patch/update` 会把既有元数据结构退化成字符串。

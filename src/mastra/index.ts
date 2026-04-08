@@ -23,6 +23,17 @@ import { MastraCompositeStore } from '@mastra/core/storage'
 import { DuckDBStore } from '@mastra/duckdb'
 import { chatRoute } from '@mastra/ai-sdk'
 import { MastraEditor } from '@mastra/editor'
+import {
+  obsidianAppendNoteTool,
+  obsidianCreateNoteTool,
+  obsidianDeleteNoteTool,
+  obsidianListNotesTool,
+  obsidianMoveNoteTool,
+  obsidianPatchFrontmatterTool,
+  obsidianReadNoteTool,
+  obsidianSearchNotesTool,
+  obsidianUpdateNoteTool,
+} from './tools/obsidian';
 type JwtClaims = {
   sub?: string;
   email?: string;
@@ -55,6 +66,17 @@ export const mastra = new Mastra({
   editor: new MastraEditor(),
   workflows: { weatherWorkflow, branchTestWorkflow, foreachTestWorkflow, himtTestWorkflow, lessonPrepWorkflow },
   agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent, storyWriterAgent },
+  tools: {
+    obsidianReadNoteTool,
+    obsidianListNotesTool,
+    obsidianSearchNotesTool,
+    obsidianCreateNoteTool,
+    obsidianUpdateNoteTool,
+    obsidianPatchFrontmatterTool,
+    obsidianAppendNoteTool,
+    obsidianDeleteNoteTool,
+    obsidianMoveNoteTool,
+  },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   server: {
     apiRoutes: [
@@ -135,4 +157,3 @@ export const mastra = new Mastra({
     },
   }),
 });
-

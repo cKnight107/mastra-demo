@@ -84,7 +84,8 @@
 | 删除策略 | 双模式：`moveToTrash`（默认 true）+ 直接删除 | 用户确认选项 C：灵活，默认安全 |
 | 搜索范围 | 双模式：默认仅元数据，`searchContent: true` 扩展到正文 | 用户确认选项 C：兼顾性能与覆盖面 |
 | 路径安全 | 复用现有 `resolveVaultSubpath` 逻辑，所有路径操作均限制在 vault 根目录内 | 与现有安全实践保持一致 |
-| frontmatter 解析 | 手动解析 YAML（不引入外部依赖），与现有 `toYamlString` 风格保持一致 | 避免增加依赖，项目现有实现可参照 |
+| frontmatter 解析 | 手动解析 YAML（不引入外部依赖），覆盖本工具集生成格式与常见 inline list/object frontmatter，并与现有 `toYamlString` 风格保持一致 | 避免增加依赖，同时降低对既有 Obsidian 笔记元数据的破坏风险 |
+| `move-note` 覆盖边界 | `overwrite` 仅允许覆盖现有目标文件，不允许目录路径被覆盖 | 防止误删目录树，保持“覆盖单个笔记”这一安全边界 |
 | 回收站路径 | vault 根目录下 `_trash/`，保留原始相对路径结构 | 便于恢复，不污染其他目录 |
 
 ## 风险
@@ -93,7 +94,7 @@
 |---|---|---|
 | 删除操作不可逆（直接删除模式） | 中 | 默认 `moveToTrash: true`，tool 描述中明确标注风险 |
 | `search-notes` 全文模式在大 vault 下性能差 | 中 | 默认关闭全文搜索；tool 描述中说明性能影响 |
-| frontmatter 手动解析可能遗漏边缘格式 | 低 | 仅处理本工具集自身生成的标准 frontmatter 格式；对异常格式做容错处理 |
+| frontmatter 手动解析可能遗漏边缘格式 | 低 | 覆盖本工具集生成格式和常见 inline list/object 语法；对更复杂 YAML 语法做容错处理，无法识别时不做结构化扩展 |
 | `move-note` 后 Obsidian 内部链接失效 | 低 | tool 描述中注明"不会自动更新 vault 内的 wikilink" |
 | 路径穿越攻击 | 低 | 所有路径操作均经过 `resolveVaultSubpath` 校验 |
 
