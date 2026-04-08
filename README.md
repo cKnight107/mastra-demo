@@ -1,4 +1,4 @@
-# mastra-demo
+﻿# mastra-demo
 
 一个基于 [Mastra](https://mastra.ai/) 的 TypeScript 示例项目，当前已注册 `weatherAgent`、`travelAgent`、`supervisor`、`lessonPrepAgent`，其中 `travelAgent` 已接入 Discord channel。
 
@@ -12,6 +12,85 @@ pnpm run dev
 ```
 
 打开 [http://localhost:4111](http://localhost:4111) 进入 [Mastra Studio](https://mastra.ai/docs/getting-started/studio)。
+Open [http://localhost:4111](http://localhost:4111) in your browser to access [Mastra Studio](https://mastra.ai/docs/getting-started/studio). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
+
+You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
+
+## 本地模型提供商
+
+当前项目已支持通过 Mastra 的 `OpenAICompatibleConfig` 接入本地 Ollama。
+
+### 环境变量
+
+复制 `.env.example` 到 `.env` 后，可以按需配置：
+
+```shell
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
+```
+
+- `OLLAMA_BASE_URL`: 本地 Ollama 的 OpenAI-compatible 接口地址，默认按本机 `11434` 端口处理
+
+### 已新增模型
+
+项目已在 `src/mastra/agents/models.ts` 中导出：
+
+```ts
+gemma4E4bModel
+```
+
+对应本地模型名：
+
+```shell
+gemma4:e4b
+```
+
+如果需要让某个 agent 使用该模型，直接从 `src/mastra/agents/models.ts` 导入并替换对应 `model` 配置即可。
+
+
+## Obsidian 接入
+
+当前项目已新增一个面向短篇小说场景的本地 Obsidian 落库能力，采用“直接写入 vault 目录”的方式接入，不依赖额外 MCP 或 REST API。
+
+### 环境变量
+
+复制 `.env.example` 到 `.env` 后，配置：
+
+```shell
+OBSIDIAN_VAULT_PATH=D:\Obsidian\YourVault
+```
+
+- `OBSIDIAN_VAULT_PATH`: Obsidian vault 根目录的本地绝对路径
+
+### 当前本地配置
+
+当前开发环境已按本机 vault 地址接入：
+
+```shell
+D:\Administrator\Documents\Obsidian Vault
+```
+
+### 新增能力
+
+- 新增 agent：`story-writer-agent`
+- 新增 tool：`saveObsidianStoryTool`
+- 默认落库目录：`小说库/短篇`
+
+### 使用方式
+
+启动开发服务后，可通过 Studio 或聊天路由与 `story-writer-agent` 交互。该 agent 在生成短篇小说成稿后，会默认将 Markdown 笔记保存到 Obsidian vault。
+
+示例提示词：
+
+```text
+写一篇 2000 字左右的悬疑短篇，主角是一名夜班保安，结尾带一点反转，但整体要克制。写完后保存到 Obsidian。
+```
+
+保存后的 Markdown 文件会自动带有 frontmatter，包含标题、状态、题材、文风、摘要和标签，便于在 Obsidian 中继续改稿和管理。
+## JWT 鉴权
+
+当前仓库保留了 Mastra 官方 `MastraJwtAuth` 的接入代码，但默认仍处于注释状态，当前分支默认不会强制所有 `/api/*` 请求携带 JWT。
+
+如果你准备重新启用 JWT，可按下面方式配置：
 
 ## 环境变量
 
@@ -19,6 +98,7 @@ pnpm run dev
 
 ```shell
 DASHSCOPE_API_KEY=your-dashscope-api-key
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
 OPENAI_API_KEY=your-openai-api-key
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mastra_demo
 DATABASE_SSL=false
@@ -138,7 +218,7 @@ npm run jwt:dev -- user-456 user456@example.com "User 456"
 
 ### 在 Studio 中调试
 
-启动开发服务器后，打开 Studio，进入 `Settings`，在 `Headers` 中添加：
+如果你重新启用了 JWT 鉴权，启动开发服务器后，打开 Studio，进入 `Settings`，在 `Headers` 中添加：
 
 ```shell
 Authorization: Bearer <your-jwt>
@@ -155,4 +235,17 @@ curl -X POST http://localhost:4111/api/agents/weatherAgent/generate \
   }'
 ```
 
-项目会把 JWT 中的 `sub` 绑定到 Mastra 的 `MASTRA_RESOURCE_ID_KEY`，这样线程和记忆数据会按用户隔离。
+重新启用 JWT 后，项目会把 JWT 中的 `sub` 绑定到 Mastra 的 `MASTRA_RESOURCE_ID_KEY`，这样线程和记忆数据会按用户隔离。
+
+## Learn more
+
+To learn more about Mastra, visit our [documentation](https://mastra.ai/docs/). Your bootstrapped project includes example code for [agents](https://mastra.ai/docs/agents/overview), [tools](https://mastra.ai/docs/agents/using-tools), [workflows](https://mastra.ai/docs/workflows/overview), [scorers](https://mastra.ai/docs/evals/overview), and [observability](https://mastra.ai/docs/observability/overview).
+
+If you're new to AI agents, check out our [course](https://mastra.ai/course) and [YouTube videos](https://youtube.com/@mastra-ai). You can also join our [Discord](https://discord.gg/BTYqqHKUrf) community to get help and share your projects.
+
+## Deploy on Mastra Cloud
+
+[Mastra Cloud](https://cloud.mastra.ai/) gives you a serverless agent environment with atomic deployments. Access your agents from anywhere and monitor performance. Make sure they don't go off the rails with evals and tracing.
+
+Check out the [deployment guide](https://mastra.ai/docs/deployment/overview) for more details.
+

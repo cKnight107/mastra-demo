@@ -1,15 +1,8 @@
 import { createDiscordAdapter } from '@chat-adapter/discord';
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
-import { qwen36PlusModel } from './models';
 import { storage } from '../storage';
-import { routeCitiesTool } from '../tools/route-cities-tool';
-
-// const travelAgentDiscordChannel = {
-//   adapter: createDiscordAdapter(),
-//   gateway: true,
-//   cards: true,
-// } as const;
+import { qwen35PlusModel,qwen36PlusModel,gemma4E4bModel } from './models';
 
 export const travelAgent = new Agent({
   id: 'travel-agent',
@@ -31,7 +24,7 @@ export const travelAgent = new Agent({
     - 先结合图片内容理解用户问题，再给出旅行建议
     - 无法确认图片细节时明确说明不确定点，并继续追问必要信息
   `,
-  model: qwen36PlusModel,
+  model: gemma4E4bModel,
   tools: { routeCitiesTool },
   memory: new Memory({
     storage,
