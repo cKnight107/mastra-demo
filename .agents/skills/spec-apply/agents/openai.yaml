@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Apply"
+  short_description: "按已确认 spec/tasks/log 逐项实施任务并展示可验证证据"
+  default_prompt: "使用 $spec-apply 按已确认的 spec.md、tasks.md、log.md 逐项执行实现任务；默认每完成一项就展示验证证据并等待用户确认。"

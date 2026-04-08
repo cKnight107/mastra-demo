@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Fix"
+  short_description: "在 review 后按问题清单做增量修正并强制同步 spec tasks log"
+  default_prompt: "使用 $spec-fix 根据 review 结果对当前实现做增量修正；每完成一项修正都同步 spec.md、tasks.md、log.md，并给出验证证据。"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Review"
+  short_description: "先核对 spec 落地一致性，再按 rules 分级做代码质量审查并给出回退建议"
+  default_prompt: "使用 $spec-review 对当前实现做两阶段审查：先逐条核对 spec 与代码一致性，PASS 后再按 rules 检查代码质量并输出分级结论。"

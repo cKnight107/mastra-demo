@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Init"
+  short_description: "初始化项目规范文档骨架技能"
+  default_prompt: "Use $spec-init to initialize a version-safe documentation scaffold for the current repository."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Create"
+  short_description: "创建新的项目规范文档技能"
+  default_prompt: "Use $spec-create to create a new specification file for the current repository."
