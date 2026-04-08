@@ -6,3 +6,6 @@
 - 规格模板
 - 任务拆解模板
 - 记录模板
+
+## 当前提案
+- [add-discord-channel](./add-discord-channel/spec.md): 调研 Mastra `channels` 与 Discord 接入方案，等待范围确认后进入实现
