@@ -1,0 +1,22 @@
+{
+  "projectSlug": "time-travel-ancient-comedy-court-chef",
+  "language": "zh-CN",
+  "premise": "一个现代预制菜产品经理在加班到凌晨后意外穿越到古代，被误认为深藏不露的御厨门生，只能靠半懂不懂的职场黑话、流程管理习惯和离谱的临场发挥，在王府后厨和宫廷风波里一路蒙混过关。",
+  "genre": "古代穿越喜剧",
+  "tone": "轻松搞笑、节奏明快、带一点古风戏谑",
+  "pov": "第三人称",
+  "targetWords": 7000,
+  "endingStyle": "热闹圆满，带一点反差回味",
+  "mustInclude": [
+    "王府后厨",
+    "把现代职场术语说成古代兵法",
+    "一次宫宴上的大型翻车又反转"
+  ],
+  "mustAvoid": [
+    "沉重宫斗",
+    "严肃权谋主线",
+    "过多历史考据说明"
+  ],
+  "referenceNotes": [],
+  "exportProfile": "authoring"
+}
