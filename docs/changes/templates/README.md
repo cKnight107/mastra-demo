@@ -12,4 +12,5 @@
 - [add-obsidian-vault-integration](./add-obsidian-vault-integration/spec.md): 为短篇小说 agent 增加本地 Obsidian vault Markdown 落库能力
 
 ## 已归档
+- [chef-teaching-agent](../../archives/chef-teaching-agent/spec.md): 已归档，创建厨师教学 Agent，集成全套 obsidian 工具用于菜谱讲解与 CRUD 测试
 - [obsidian-crud-tools](../../archives/obsidian-crud-tools/spec.md): 已归档，新增通用 Obsidian vault 笔记 CRUD/search/list/read tools，并完成 review/fix 闭环

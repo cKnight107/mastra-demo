@@ -17,6 +17,7 @@ import { travelAgent } from './agents/travel-agent';
 import { supervisor } from './agents/team-agent';
 import { lessonPrepAgent } from './agents/lesson-prep-agent';
 import { storyWriterAgent } from './agents/story-writer-agent';
+import { chefTeachingAgent } from './agents/chef-teaching-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
 import { storage as pgStorage } from './storage';
 import { MastraCompositeStore } from '@mastra/core/storage'
@@ -65,7 +66,7 @@ const getJwtSubject = (user: unknown): string | null => {
 export const mastra = new Mastra({
   editor: new MastraEditor(),
   workflows: { weatherWorkflow, branchTestWorkflow, foreachTestWorkflow, himtTestWorkflow, lessonPrepWorkflow },
-  agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent, storyWriterAgent },
+  agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent, storyWriterAgent, chefTeachingAgent },
   tools: {
     obsidianReadNoteTool,
     obsidianListNotesTool,
