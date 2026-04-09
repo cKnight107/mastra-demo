@@ -14,3 +14,4 @@
 ## 已归档
 - [chef-teaching-agent](../../archives/chef-teaching-agent/spec.md): 已归档，创建厨师教学 Agent，集成全套 obsidian 工具用于菜谱讲解与 CRUD 测试
 - [obsidian-crud-tools](../../archives/obsidian-crud-tools/spec.md): 已归档，新增通用 Obsidian vault 笔记 CRUD/search/list/read tools，并完成 review/fix 闭环
+- [short-story-workflow](../../archives/short-story-workflow/spec.md): 已归档，短篇小说生成升级为结构化多步 Workflow，完成 4 Agent 分工、Obsidian 项目目录输出与回归验证闭环

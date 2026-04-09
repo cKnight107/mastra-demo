@@ -10,3 +10,4 @@
 
 ## 实现知识
 - Obsidian frontmatter 手写解析至少要兼容本工具生成格式和常见 inline list/object 语法；否则 `patch/update` 会把既有元数据结构退化成字符串。
+- Mastra Studio/API 即使已经打印 ready 日志，后续仍可能因为 `mastra.duckdb` 被其他进程占用而出现锁冲突；本地调试时不能只看启动成功日志，还要排查是否有并发进程共享同一数据库文件。

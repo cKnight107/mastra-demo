@@ -12,12 +12,16 @@ import { branchTestWorkflow } from './workflows/branch-workflow';
 import { foreachTestWorkflow } from './workflows/foreach-workflow';
 import { himtTestWorkflow } from './workflows/himt-workflow';
 import { lessonPrepWorkflow } from './workflows/lesson-prep-workflow';
+import { shortStoryWorkflow } from './workflows/short-story-workflow';
 import { weatherAgent } from './agents/weather-agent';
 import { travelAgent } from './agents/travel-agent';
 import { supervisor } from './agents/team-agent';
 import { lessonPrepAgent } from './agents/lesson-prep-agent';
-import { storyWriterAgent } from './agents/story-writer-agent';
 import { chefTeachingAgent } from './agents/chef-teaching-agent';
+import { storyPlannerAgent } from './agents/story-planner-agent';
+import { storyDrafterAgent } from './agents/story-drafter-agent';
+import { storyEditorAgent } from './agents/story-editor-agent';
+import { storySummarizerAgent } from './agents/story-summarizer-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
 import { storage as pgStorage } from './storage';
 import { MastraCompositeStore } from '@mastra/core/storage'
@@ -65,8 +69,25 @@ const getJwtSubject = (user: unknown): string | null => {
 
 export const mastra = new Mastra({
   editor: new MastraEditor(),
-  workflows: { weatherWorkflow, branchTestWorkflow, foreachTestWorkflow, himtTestWorkflow, lessonPrepWorkflow },
-  agents: { weatherAgent, travelAgent, supervisor, lessonPrepAgent, storyWriterAgent, chefTeachingAgent },
+  workflows: {
+    weatherWorkflow,
+    branchTestWorkflow,
+    foreachTestWorkflow,
+    himtTestWorkflow,
+    lessonPrepWorkflow,
+    shortStoryWorkflow,
+  },
+  agents: {
+    weatherAgent,
+    travelAgent,
+    supervisor,
+    lessonPrepAgent,
+    chefTeachingAgent,
+    storyPlannerAgent,
+    storyDrafterAgent,
+    storyEditorAgent,
+    storySummarizerAgent,
+  },
   tools: {
     obsidianReadNoteTool,
     obsidianListNotesTool,
@@ -140,9 +161,9 @@ export const mastra = new Mastra({
   storage: new MastraCompositeStore({
     id: 'composite-storage',
     default: pgStorage,
-    domains: {
-      observability: await new DuckDBStore().getStore('observability'),
-    },
+    // domains: {
+    //   observability: await new DuckDBStore().getStore('observability'),
+    // },
   }),
   logger: new PinoLogger({
     name: 'Mastra',
