@@ -35,7 +35,8 @@
 
 - 无需手动填写 JSON 参数，只需用自然语言说"我想写一个关于 X 的故事"
 - Agent 自动追问缺失字段，最终组装完整入参
-- 生成完成后展示文件路径、字数、primaryFile 等关键信息
+- 先异步启动长耗时 workflow，避免聊天链路被长时间阻塞
+- 用户后续可按 runId 查询进度；完成后再展示文件路径、字数、primaryFile 等关键信息
 
 ### 行为变化
 
@@ -43,7 +44,8 @@
 |--------|--------|--------|
 | Workflow 触发方式 | Studio 手动填参 | 对话式 Agent 自动组装 |
 | 参数采集 | 无 | 多轮对话收集，缺失时追问 |
-| 结果展示 | Studio 返回 JSON | Agent 用自然语言总结 |
+| 启动方式 | Tool 同步等待 workflow 结束 | Tool 异步返回 runId，后台执行 |
+| 结果展示 | Studio 返回 JSON | Agent 可分两段：先确认已启动，再查询并总结结果 |
 
 ---
 
@@ -70,12 +72,13 @@
 
 | 决策 | 选择 | 原因 |
 |------|------|------|
-| Workflow 调用方式 | 方案 A：Tool 直接 import `shortStoryWorkflow` | 用户已确认，最简单；`shortStoryWorkflow` 已 export，无需通过 `mastra` 实例查找 |
+| Workflow 调用方式 | 方案 A + async：Tool 直接 import `shortStoryWorkflow`，启动时使用 `createRun().startAsync()`，查询时使用 `getWorkflowRunById()` | 保留最简单引用关系，同时避免聊天请求长期等待 workflow 完成 |
 | Tool 文件位置 | `src/mastra/tools/launch-story-workflow-tool.ts` | 与现有 tools 目录结构一致 |
 | Agent 模型 | `qwen36PlusModel`（`alibaba-cn/qwen3.6-plus`，复用 Dashscope compatible URL） | 与现有 story agents 同款，且兼容当前安装版 Mastra provider registry |
 | Memory 类型 | `workingMemory`（thread-scoped） + `lastMessages: 20` | thread-scoped：同一对话内记住已收集字段即可；resource-scoped 适合跨会话用户画像，本场景不需要 |
 | Memory storage | 复用 `src/mastra/storage.ts` 的 pgStorage | 与 `chef-teaching-agent` 保持一致 |
 | `projectSlug` 处理 | Agent instructions 中说明：可从 premise 自动推导英文/拼音 slug，或追问用户 | 减少用户摩擦，workflow 内部已有规范化逻辑 |
+| 长耗时结果查询 | 新增独立状态查询 tool | Agent 后续可查询 runId 的完成态、失败态和最终 manifest |
 
 ---
 
@@ -85,7 +88,8 @@
 
 | 文件 | 说明 |
 |------|------|
-| `src/mastra/tools/launch-story-workflow-tool.ts` | `launchStoryWorkflowTool`，inputSchema = `storyRequestSchema`，内部调用 `shortStoryWorkflow.createRun().start()` |
+| `src/mastra/tools/launch-story-workflow-tool.ts` | `launchStoryWorkflowTool`，inputSchema = `storyRequestSchema`，内部调用 `shortStoryWorkflow.createRun().startAsync()` |
+| `src/mastra/tools/get-story-workflow-run-tool.ts` | `getStoryWorkflowRunTool`，inputSchema = `runId`，内部调用 `shortStoryWorkflow.getWorkflowRunById()` |
 | `src/mastra/agents/story-launcher-agent.ts` | `storyLauncherAgent`，含 Memory、工具绑定、instructions |
 
 ### 会修改的文件
@@ -107,9 +111,9 @@
 
 | 风险 | 等级 | 缓解 |
 |------|------|------|
-| Workflow 执行时间长（可能 > 1min），Agent 超时 | 中 | instructions 中告知用户等待；Tool 内无超时设置，依赖 Mastra 默认行为 |
+| Workflow 执行时间长（可能 > 1min），Agent 超时 | 中 | 启动工具改用 `startAsync()`，立即返回 runId；由独立状态查询 tool 查询完成态 |
 | Agent 自动推导的 `projectSlug` 与已有目录冲突 | 低 | `normalizeBriefStep` 已有冲突检测并记录 warning |
-| Tool `execute` 返回的 `result.result` 类型未验证 | 低 | 使用 `artifactManifestSchema` 作为 `outputSchema`，Mastra 负责校验 |
+| 状态查询时拿到的 `run.result` 结构异常 | 低 | 查询 tool 使用 `artifactManifestSchema.safeParse()` 二次校验，不符合预期则返回错误说明 |
 | Memory storage（pg）未配置时 Agent 启动失败 | 低 | 与 `chef-teaching-agent` 相同依赖，环境已就绪 |
 | Dashscope provider key 与 Mastra 当前 registry 不一致导致运行时启动失败 | 中 | `models.ts` 统一改为 `OpenAICompatibleConfig { providerId: 'alibaba-cn', modelId, url }`，避免使用不存在的 `dashscope` provider key |
 

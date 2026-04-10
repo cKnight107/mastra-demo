@@ -144,6 +144,38 @@ export const artifactManifestSchema = z.object({
   warnings: warningListSchema.default([]),
 });
 
+export const storyWorkflowRunStatusSchema = z.enum([
+  'pending',
+  'running',
+  'success',
+  'failed',
+  'tripwire',
+  'suspended',
+  'waiting',
+  'canceled',
+  'bailed',
+  'paused',
+]);
+
+export const storyWorkflowRunLookupSchema = z.object({
+  runId: z.string().min(1).describe('workflow runId'),
+});
+
+export const launchStoryWorkflowResultSchema = z.object({
+  runId: z.string().min(1),
+  status: z.literal('pending'),
+  projectSlug: z.string().min(1),
+  message: z.string().min(1),
+});
+
+export const storyWorkflowRunQueryResultSchema = z.object({
+  runId: z.string().min(1),
+  found: z.boolean(),
+  status: storyWorkflowRunStatusSchema.nullable(),
+  manifest: artifactManifestSchema.nullable(),
+  errorMessage: z.string().nullable(),
+});
+
 export type StoryRequest = z.infer<typeof storyRequestSchema>;
 export type StoryOutline = z.infer<typeof outlineSchema>;
 export type StorySummary = z.infer<typeof storySummarySchema>;

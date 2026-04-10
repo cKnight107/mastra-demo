@@ -45,3 +45,20 @@
   - `npm run build` 通过
   - 加载 `.mastra/output/mastra.mjs` 时不再出现 `Unknown provider: dashscope`
   - 当前剩余阻塞变为沙箱环境下的 PostgreSQL 连接 `EPERM`，不属于本次 provider fix 未关闭项
+
+## Fix 任务（2026-04-10）
+
+- [x] 将 `launchStoryWorkflowTool` 改为异步启动
+  - `shortStoryWorkflow.createRun({ resourceId })`
+  - `run.startAsync({ inputData })`
+  - 返回 `runId` + `pending` 状态，而不是同步等待最终 manifest
+- [x] 新增 `src/mastra/tools/get-story-workflow-run-tool.ts`
+  - 输入 `runId`
+  - 使用 `shortStoryWorkflow.getWorkflowRunById()` 查询状态
+  - success 时返回 manifest；失败或缺失时返回明确错误说明
+- [x] 更新 `storyLauncherAgent` 的工具绑定、指令和 working memory
+  - 支持“启动任务”和“查询最近一次或指定 runId 的任务状态”两类意图
+  - memory 中补充 `latestRunId` / `latestRunStatus` / `latestRunProjectSlug`
+- [x] 扩充验证脚本
+  - mock `shortStoryWorkflow.createRun()` / `getWorkflowRunById()`
+  - 验证异步启动返回 runId，且查询工具可返回 success / not-found 两类结果

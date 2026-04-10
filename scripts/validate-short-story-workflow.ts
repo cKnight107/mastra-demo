@@ -11,6 +11,9 @@ process.env.OBSIDIAN_VAULT_PATH = vaultPath;
 
 const main = async () => {
   const { shortStoryWorkflow } = await import('../src/mastra/workflows/short-story-workflow');
+  const { storyEditorAgent } = await import('../src/mastra/agents/story-editor-agent');
+  const { launchStoryWorkflowTool } = await import('../src/mastra/tools/launch-story-workflow-tool');
+  const { getStoryWorkflowRunTool } = await import('../src/mastra/tools/get-story-workflow-run-tool');
 
   type SuccessResult = Awaited<ReturnType<Awaited<ReturnType<typeof shortStoryWorkflow.createRun>>['start']>> & {
     status: 'success';
@@ -33,6 +36,27 @@ const main = async () => {
 
     return result as SuccessResult;
   };
+
+  const originalEditorGenerate = storyEditorAgent.generate.bind(storyEditorAgent);
+  Object.assign(storyEditorAgent, {
+    generate: async (prompt: string) => {
+      const draftMarker = 'draft：\n';
+      const draftIndex = prompt.lastIndexOf(draftMarker);
+      const draftMarkdown = draftIndex >= 0 ? prompt.slice(draftIndex + draftMarker.length).trim() : '# Mock Story\n\n正文。';
+
+      return {
+        text: [
+          '<final_markdown>',
+          `${draftMarkdown}\n\n这一版经过编辑润色，句子更紧凑。`,
+          '</final_markdown>',
+          '<revision_notes>',
+          '- 收紧了叙事节奏。',
+          '- 保留原有设定，仅做语言与衔接修订。',
+          '</revision_notes>',
+        ].join('\n'),
+      };
+    },
+  });
 
   const minimalResult = await runWorkflow({
     projectSlug: 'review-minimal-case',
@@ -119,6 +143,114 @@ const main = async () => {
     'utf8',
   );
   assert.match(storyMarkdown, /青铜鸟在第三声钟响后才开口/);
+  assert.match(storyMarkdown, /这一版经过编辑润色/);
+
+  const revisionLogMarkdown = readFileSync(
+    path.join(vaultPath, 'Stories', 'review-authoring-case', '07-revision-log.md'),
+    'utf8',
+  );
+  assert.doesNotMatch(revisionLogMarkdown, /编辑阶段结构化输出失败/);
+  assert.match(revisionLogMarkdown, /收紧了叙事节奏/);
+
+  Object.assign(storyEditorAgent, {
+    generate: originalEditorGenerate,
+  });
+
+  const originalCreateRun = shortStoryWorkflow.createRun.bind(shortStoryWorkflow);
+  const originalGetWorkflowRunById = shortStoryWorkflow.getWorkflowRunById.bind(shortStoryWorkflow);
+  let capturedResourceId: string | undefined;
+
+  Object.assign(shortStoryWorkflow, {
+    createRun: async (options?: { resourceId?: string }) => {
+      capturedResourceId = options?.resourceId;
+      return {
+        startAsync: async () => ({ runId: 'async-run-123' }),
+      };
+    },
+    getWorkflowRunById: async (runId: string) => {
+      if (runId === 'async-run-123') {
+        return {
+          runId,
+          workflowName: 'short-story-workflow',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          status: 'success',
+          result: {
+            projectDir: 'Stories/async-case',
+            title: '异步故事',
+            primaryFile: 'Stories/async-case/story.md',
+            files: [{ path: 'Stories/async-case/story.md', kind: 'story' }],
+            stats: { wordCount: 888 },
+            warnings: [],
+          },
+        };
+      }
+
+      return null;
+    },
+  });
+
+  const launchResult = await launchStoryWorkflowTool.execute!(
+    {
+      projectSlug: 'async-case',
+      language: 'zh-CN',
+      premise: '测试异步启动。',
+      genre: '科幻',
+      tone: '冷静',
+      targetWords: 800,
+      mustInclude: [],
+      mustAvoid: [],
+      referenceNotes: [],
+      exportProfile: 'minimal',
+    },
+    {
+      agent: {
+        agentId: 'story-launcher-agent',
+        toolCallId: 'tool-call-1',
+        messages: [],
+        suspend: async () => {},
+        resourceId: 'resource-123',
+      },
+    } as never,
+  );
+
+  assert.deepEqual(launchResult, {
+    runId: 'async-run-123',
+    status: 'pending',
+    projectSlug: 'async-case',
+    message: 'shortStoryWorkflow 已转入后台执行，可稍后用 runId async-run-123 查询状态。',
+  });
+  assert.equal(capturedResourceId, 'resource-123');
+
+  const workflowStatus = await getStoryWorkflowRunTool.execute!({ runId: 'async-run-123' });
+  assert.deepEqual(workflowStatus, {
+    runId: 'async-run-123',
+    found: true,
+    status: 'success',
+    manifest: {
+      projectDir: 'Stories/async-case',
+      title: '异步故事',
+      primaryFile: 'Stories/async-case/story.md',
+      files: [{ path: 'Stories/async-case/story.md', kind: 'story' }],
+      stats: { wordCount: 888 },
+      warnings: [],
+    },
+    errorMessage: null,
+  });
+
+  const missingWorkflowStatus = await getStoryWorkflowRunTool.execute!({ runId: 'missing-run' });
+  assert.deepEqual(missingWorkflowStatus, {
+    runId: 'missing-run',
+    found: false,
+    status: null,
+    manifest: null,
+    errorMessage: '未找到对应的 shortStoryWorkflow 运行记录。',
+  });
+
+  Object.assign(shortStoryWorkflow, {
+    createRun: originalCreateRun,
+    getWorkflowRunById: originalGetWorkflowRunById,
+  });
 
   console.log(
     JSON.stringify(
@@ -136,6 +268,12 @@ const main = async () => {
             files: getSortedFileNames(authoringResult.result.files),
             fallbackBeatCount: planStep.output.outline.beats.length,
             fallbackTitleCandidateCount: planStep.output.outline.titleCandidates.length,
+          },
+          {
+            name: 'story-launcher-async-tools',
+            launchRunId: launchResult?.runId,
+            launchStatus: launchResult?.status,
+            queryStatus: workflowStatus?.status,
           },
         ],
       },

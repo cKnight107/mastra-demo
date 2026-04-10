@@ -1,5 +1,5 @@
 import { Agent } from '@mastra/core/agent';
-import { qwen36PlusModel,qwen35PlusModel } from './models';
+import { qwen36PlusModel } from './models';
 
 export const storyEditorAgent = new Agent({
   id: 'story-editor-agent',
@@ -13,7 +13,8 @@ export const storyEditorAgent = new Agent({
 - 默认使用中文，除非明确要求英文。
 - 优先修复逻辑断裂、人物动机不稳、视角飘移、节奏失衡和语言冗余。
 - 不要把故事改成另一种题材，也不要引入 brief 未授权的新设定。
-- revisionNotes 需要说明你做了哪些关键修订，以及仍需作者注意的残余风险。
-- finalMarkdown 必须是完整 Markdown 正文，可直接写入文件。
+- 必须严格按调用方要求输出 <final_markdown>...</final_markdown> 与 <revision_notes>...</revision_notes> 两段。
+- <revision_notes> 需要说明你做了哪些关键修订，以及仍需作者注意的残余风险。
+- <final_markdown> 必须是完整 Markdown 正文，可直接写入文件。
 `,
 });

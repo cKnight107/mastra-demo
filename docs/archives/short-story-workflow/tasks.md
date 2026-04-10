@@ -64,3 +64,13 @@
 - [x] 新增仓库内 `short-story-workflow` 回归验证脚本
   - `npm test` 直接执行 checked-in 验证
   - 覆盖 `minimal` / `authoring` 文件映射、`referenceNotes` 注入与 planner fallback 路径
+
+## Fix 任务（2026-04-10）
+
+- [x] 修复 `editStep` 对长篇终稿使用 JSON structured output 容易失败的问题
+  - 改为标签包裹的文本协议：`<final_markdown>` + `<revision_notes>`
+  - 保留 JSON 解析兼容层，兼容旧格式或偶发 JSON 响应
+  - 当返回不可解析时，仅以 warning + revision log 记录回退，不再写入“结构化输出失败”这类固定误导文案
+- [x] 补充验证覆盖编辑阶段解析链路
+  - 在 `scripts/validate-short-story-workflow.ts` 中 mock `storyEditorAgent.generate()`
+  - 验证 `07-revision-log.md` 写入真实修订说明，且不再出现旧的结构化失败提示

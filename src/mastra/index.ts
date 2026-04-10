@@ -29,6 +29,7 @@ import { MastraCompositeStore } from '@mastra/core/storage'
 import { DuckDBStore } from '@mastra/duckdb'
 import { chatRoute } from '@mastra/ai-sdk'
 import { MastraEditor } from '@mastra/editor'
+import { getStoryWorkflowRunTool } from './tools/get-story-workflow-run-tool';
 import { launchStoryWorkflowTool } from './tools/launch-story-workflow-tool';
 import {
   obsidianAppendNoteTool,
@@ -101,6 +102,7 @@ export const mastra = new Mastra({
     obsidianAppendNoteTool,
     obsidianDeleteNoteTool,
     obsidianMoveNoteTool,
+    getStoryWorkflowRunTool,
     launchStoryWorkflowTool,
   },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },

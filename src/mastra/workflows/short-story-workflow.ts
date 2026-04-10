@@ -50,6 +50,10 @@ const MINIMAL_PROJECT_FILE_NAMES = {
   summary: 'summary.md',
   metadata: 'metadata.md',
 } as const;
+
+const EDITOR_FINAL_MARKDOWN_TAG = 'final_markdown';
+const EDITOR_REVISION_NOTES_TAG = 'revision_notes';
+
 const STORY_MODELS = {
   planner: 'dashscope/qwen3.6-plus',
   drafter: 'dashscope/qwen3.6-plus',
@@ -233,29 +237,22 @@ const editStep = createStep({
   inputSchema: storyDraftContextSchema,
   outputSchema: storyEditContextSchema,
   execute: async ({ inputData }) => {
-    let editResult: z.infer<typeof storyEditResultSchema> = {
-      finalMarkdown: ensureStoryHeading(inputData.outline.title, inputData.draftMarkdown),
-      revisionNotes: '编辑阶段结构化输出失败，已直接使用初稿作为终稿。',
-    };
+    let editResult = buildFallbackEditResult(inputData, '编辑阶段未拿到可解析终稿，已保留初稿。');
 
     try {
-      const response = await storyEditorAgent.generate(buildEditorPrompt(inputData), {
-        structuredOutput: {
-          schema: storyEditResultSchema,
-          jsonPromptInjection: true,
-        },
-      });
+      const response = await storyEditorAgent.generate(buildEditorPrompt(inputData));
+      const parsedEditResult = parseEditorResponse(response.text);
 
-      if (response.object) {
+      if (parsedEditResult) {
         editResult = {
-          finalMarkdown: ensureStoryHeading(inputData.outline.title, response.object.finalMarkdown),
-          revisionNotes: response.object.revisionNotes,
+          finalMarkdown: ensureStoryHeading(inputData.outline.title, parsedEditResult.finalMarkdown),
+          revisionNotes: parsedEditResult.revisionNotes,
         };
       } else {
-        inputData.warnings.push('editorAgent 未返回结构化结果，已回退为初稿。');
+        inputData.warnings.push('editorAgent 返回内容未匹配约定标签或 JSON 结构，已回退为初稿。');
       }
     } catch (error) {
-      inputData.warnings.push(`editorAgent structured output 失败，已回退为初稿：${getErrorMessage(error)}`);
+      inputData.warnings.push(`editorAgent 调用失败，已回退为初稿：${getErrorMessage(error)}`);
     }
 
     return {
@@ -563,9 +560,12 @@ function buildEditorPrompt(input: z.infer<typeof storyDraftContextSchema>): stri
     '- 保持 genre / tone / POV 与 brief 一致。',
     '- 不要引入 brief 中没有的新设定。',
     '',
-    '返回字段要求：',
-    '- finalMarkdown: 完整 Markdown 正文，可直接写入文件。',
-    '- revisionNotes: 用中文简洁说明主要修订点与残余风险。',
+    '返回格式要求：',
+    '- 不要输出解释文字。',
+    '- 不要使用 ``` 代码块。',
+    `- 必须严格输出 <${EDITOR_FINAL_MARKDOWN_TAG}>...</${EDITOR_FINAL_MARKDOWN_TAG}> 与 <${EDITOR_REVISION_NOTES_TAG}>...</${EDITOR_REVISION_NOTES_TAG}> 两段。`,
+    `- <${EDITOR_FINAL_MARKDOWN_TAG}> 中放完整 Markdown 正文，可直接写入文件。`,
+    `- <${EDITOR_REVISION_NOTES_TAG}> 中用中文简洁说明主要修订点与残余风险。`,
     '',
     `brief：${JSON.stringify(
       {
@@ -661,6 +661,63 @@ function buildFallbackDraft(input: z.infer<typeof storyPlanningContextSchema>): 
     '',
     `故事保持 ${input.request.genre} 的框架与 ${input.request.tone} 的语气收束。`,
   ].join('\n\n');
+}
+
+function buildFallbackEditResult(
+  input: z.infer<typeof storyDraftContextSchema>,
+  revisionNotes: string,
+): z.infer<typeof storyEditResultSchema> {
+  return {
+    finalMarkdown: ensureStoryHeading(input.outline.title, input.draftMarkdown),
+    revisionNotes,
+  };
+}
+
+function parseEditorResponse(text: string | undefined): z.infer<typeof storyEditResultSchema> | null {
+  if (!text) {
+    return null;
+  }
+
+  const normalized = stripMarkdownCodeFence(text.trim());
+  const jsonResult = parseEditorJsonResponse(normalized);
+  if (jsonResult) {
+    return jsonResult;
+  }
+
+  const finalMarkdown = extractTaggedContent(normalized, EDITOR_FINAL_MARKDOWN_TAG);
+  const revisionNotes = extractTaggedContent(normalized, EDITOR_REVISION_NOTES_TAG);
+  if (!finalMarkdown || !revisionNotes) {
+    return null;
+  }
+
+  const parsed = storyEditResultSchema.safeParse({
+    finalMarkdown,
+    revisionNotes,
+  });
+
+  return parsed.success ? parsed.data : null;
+}
+
+function parseEditorJsonResponse(text: string): z.infer<typeof storyEditResultSchema> | null {
+  try {
+    const parsed = JSON.parse(text);
+    const validated = storyEditResultSchema.safeParse(parsed);
+    return validated.success ? validated.data : null;
+  } catch {
+    return null;
+  }
+}
+
+function stripMarkdownCodeFence(text: string): string {
+  const fenced = text.match(/^```(?:json|markdown)?\s*([\s\S]*?)\s*```$/u);
+  return fenced?.[1]?.trim() ?? text;
+}
+
+function extractTaggedContent(text: string, tagName: string): string | null {
+  const pattern = new RegExp(`<${tagName}>\\s*([\\s\\S]*?)\\s*</${tagName}>`, 'i');
+  const match = text.match(pattern);
+  const value = match?.[1]?.trim();
+  return value && value.length > 0 ? value : null;
 }
 
 function ensureStoryHeading(title: string, content: string): string {

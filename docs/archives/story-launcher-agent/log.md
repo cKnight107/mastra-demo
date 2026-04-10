@@ -83,3 +83,50 @@
   - 执行 `node .mastra/output/index.mjs`
   - 当前失败为监听 `0.0.0.0:4111` 的 `EPERM`
   - 同样未再出现 provider 解析错误
+
+### fix-2（launcher 改为异步 workflow 启动）
+
+- 问题来源：
+  - 用户在归档需求上线后发现，`storyLauncherAgent` 通过对话触发 `shortStoryWorkflow` 时，因为 workflow 执行很慢，聊天链路会在同步等待期间超时。
+  - 根因是 `src/mastra/tools/launch-story-workflow-tool.ts` 使用 `run.start({ inputData })`，把长耗时 workflow 完整绑在单次 tool call 内。
+- 修正动作：
+  - 按当前安装版 Mastra 文档改用 `Run.startAsync()` 启动后台执行。
+  - `launchStoryWorkflowTool` 现在返回：
+    - `runId`
+    - `status: pending`
+    - `projectSlug`
+    - 用于提示后续查询的 message
+  - 新增 `src/mastra/tools/get-story-workflow-run-tool.ts`
+    - 使用 `shortStoryWorkflow.getWorkflowRunById(runId, { fields: ['result', 'error'] })`
+    - 对 `result` 用 `artifactManifestSchema.safeParse()` 做二次校验
+    - 返回 success / in-progress / not-found / failed 场景所需的结构化信息
+  - 更新 `src/mastra/agents/story-launcher-agent.ts`
+    - 绑定新查询 tool
+    - 指令新增“优先判断是新启动还是查状态”
+    - working memory 增加 `latestRunId` / `latestRunStatus` / `latestRunProjectSlug`
+  - 更新 `src/mastra/index.ts`，注册新查询 tool。
+
+### 修正后验证证据
+
+- 文档验证
+  - 重新核对当前安装版 Mastra embedded docs：
+    - `Run.startAsync()` 文档存在于 `node_modules/@mastra/core/dist/docs/references/reference-workflows-run-methods-startAsync.md`
+    - `Workflow.getWorkflowRunById()` 类型存在于 `node_modules/@mastra/core/dist/workflows/workflow.d.ts`
+- 代码验证
+  - 扩展 `scripts/validate-short-story-workflow.ts`
+  - 在脚本中 mock：
+    - `shortStoryWorkflow.createRun()`，验证 `launchStoryWorkflowTool` 立即返回 `runId: async-run-123`
+    - `shortStoryWorkflow.getWorkflowRunById()`，验证 `getStoryWorkflowRunTool` 能返回：
+      - `status: success` + manifest
+      - `found: false` + not-found errorMessage
+  - 同时校验 `launchStoryWorkflowTool` 会把 tool context 中的 `resourceId` 透传给 `createRun({ resourceId })`
+
+### 文档同步
+
+- `spec.md`
+  - 将 launcher 的长耗时执行模式从“同步等待完成”改为“异步启动 + 轮询查询”
+  - 增加状态查询 tool 的行为与风险缓解
+- `tasks.md`
+  - 新增本轮 async fix 任务并标记完成
+- `log.md`
+  - 记录问题来源、Mastra 文档依据、修正动作与验证方式
