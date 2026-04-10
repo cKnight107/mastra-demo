@@ -22,12 +22,14 @@ import { storyPlannerAgent } from './agents/story-planner-agent';
 import { storyDrafterAgent } from './agents/story-drafter-agent';
 import { storyEditorAgent } from './agents/story-editor-agent';
 import { storySummarizerAgent } from './agents/story-summarizer-agent';
+import { storyLauncherAgent } from './agents/story-launcher-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
 import { storage as pgStorage } from './storage';
 import { MastraCompositeStore } from '@mastra/core/storage'
 import { DuckDBStore } from '@mastra/duckdb'
 import { chatRoute } from '@mastra/ai-sdk'
 import { MastraEditor } from '@mastra/editor'
+import { launchStoryWorkflowTool } from './tools/launch-story-workflow-tool';
 import {
   obsidianAppendNoteTool,
   obsidianCreateNoteTool,
@@ -87,6 +89,7 @@ export const mastra = new Mastra({
     storyDrafterAgent,
     storyEditorAgent,
     storySummarizerAgent,
+    storyLauncherAgent,
   },
   tools: {
     obsidianReadNoteTool,
@@ -98,6 +101,7 @@ export const mastra = new Mastra({
     obsidianAppendNoteTool,
     obsidianDeleteNoteTool,
     obsidianMoveNoteTool,
+    launchStoryWorkflowTool,
   },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   server: {
