@@ -10,6 +10,7 @@
 ## 当前提案
 - [add-discord-channel](./add-discord-channel/spec.md): 调研 Mastra `channels` 与 Discord 接入方案，等待范围确认后进入实现
 - [add-obsidian-vault-integration](./add-obsidian-vault-integration/spec.md): 为短篇小说 agent 增加本地 Obsidian vault Markdown 落库能力
+- [medium-novel-workflow](./medium-novel-workflow/spec.md): 新增中篇小说生成 Workflow，支持 1.3万～10万字，多章节循环 + 跨章节连续性保障 + 参数化 suspend 控制
 
 ## 已归档
 - [chef-teaching-agent](../../archives/chef-teaching-agent/spec.md): 已归档，创建厨师教学 Agent，集成全套 obsidian 工具用于菜谱讲解与 CRUD 测试

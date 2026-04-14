@@ -23,6 +23,11 @@ import { storyDrafterAgent } from './agents/story-drafter-agent';
 import { storyEditorAgent } from './agents/story-editor-agent';
 import { storySummarizerAgent } from './agents/story-summarizer-agent';
 import { storyLauncherAgent } from './agents/story-launcher-agent';
+import { novelPlannerAgent } from './agents/novel-planner-agent';
+import { chapterDrafterAgent } from './agents/chapter-drafter-agent';
+import { chapterEditorAgent } from './agents/chapter-editor-agent';
+import { continuityCheckerAgent } from './agents/continuity-checker-agent';
+import { chapterSummarizerAgent } from './agents/chapter-summarizer-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
 import { storage as pgStorage } from './storage';
 import { MastraCompositeStore } from '@mastra/core/storage'
@@ -31,6 +36,8 @@ import { chatRoute } from '@mastra/ai-sdk'
 import { MastraEditor } from '@mastra/editor'
 import { getStoryWorkflowRunTool } from './tools/get-story-workflow-run-tool';
 import { launchStoryWorkflowTool } from './tools/launch-story-workflow-tool';
+import { chapterWorkflow } from './workflows/chapter-workflow';
+import { novelWorkflow } from './workflows/novel-workflow';
 import {
   obsidianAppendNoteTool,
   obsidianCreateNoteTool,
@@ -79,6 +86,8 @@ export const mastra = new Mastra({
     himtTestWorkflow,
     lessonPrepWorkflow,
     shortStoryWorkflow,
+    chapterWorkflow,
+    novelWorkflow,
   },
   agents: {
     weatherAgent,
@@ -91,6 +100,11 @@ export const mastra = new Mastra({
     storyEditorAgent,
     storySummarizerAgent,
     storyLauncherAgent,
+    novelPlannerAgent,
+    chapterDrafterAgent,
+    chapterEditorAgent,
+    continuityCheckerAgent,
+    chapterSummarizerAgent,
   },
   tools: {
     obsidianReadNoteTool,
