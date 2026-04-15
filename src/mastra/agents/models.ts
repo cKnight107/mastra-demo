@@ -19,7 +19,7 @@ const createOllamaModel = (modelId: string): OpenAICompatibleConfig => ({
 
 export const qwen35PlusModel = createDashscopeModel('qwen3.5-plus');
 
-export const qwen36PlusModel = createDashscopeModel('qwen3.6-plus');
+export const qwen36PlusModel = createDashscopeModel('qwen3.6-plus-2026-04-02');
 
 export const qwen35FlashModel = createDashscopeModel('qwen3.5-flash');
 

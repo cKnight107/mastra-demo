@@ -328,6 +328,38 @@ export const novelManifestSchema = z.object({
   warnings: warningListSchema,
 });
 
+export const launchNovelWorkflowResultSchema = z.object({
+  runId: z.string().min(1),
+  status: z.literal('pending'),
+  projectSlug: z.string().min(1),
+  message: z.string().min(1),
+});
+
+export const novelWorkflowRunLookupSchema = z.object({
+  runId: z.string().min(1).describe('workflow runId'),
+});
+
+export const novelWorkflowRunQueryResultSchema = z.object({
+  runId: z.string().min(1),
+  found: z.boolean(),
+  status: z
+    .enum([
+      'pending',
+      'running',
+      'success',
+      'failed',
+      'tripwire',
+      'suspended',
+      'waiting',
+      'canceled',
+      'bailed',
+      'paused',
+    ])
+    .nullable(),
+  manifest: novelManifestSchema.nullable(),
+  errorMessage: z.string().nullable(),
+});
+
 export type NovelRequest = z.infer<typeof novelRequestSchema>;
 export type StoryBible = z.infer<typeof storyBibleSchema>;
 export type StoryBibleBundle = z.infer<typeof storyBibleBundleSchema>;

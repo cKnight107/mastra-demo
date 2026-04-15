@@ -34,7 +34,9 @@ import { MastraCompositeStore } from '@mastra/core/storage'
 import { DuckDBStore } from '@mastra/duckdb'
 import { chatRoute } from '@mastra/ai-sdk'
 import { MastraEditor } from '@mastra/editor'
+import { getNovelWorkflowRunTool } from './tools/get-novel-workflow-run-tool';
 import { getStoryWorkflowRunTool } from './tools/get-story-workflow-run-tool';
+import { launchNovelWorkflowTool } from './tools/launch-novel-workflow-tool';
 import { launchStoryWorkflowTool } from './tools/launch-story-workflow-tool';
 import { chapterWorkflow } from './workflows/chapter-workflow';
 import { novelWorkflow } from './workflows/novel-workflow';
@@ -107,7 +109,9 @@ export const mastra = new Mastra({
     obsidianAppendNoteTool,
     obsidianDeleteNoteTool,
     obsidianMoveNoteTool,
+    getNovelWorkflowRunTool,
     getStoryWorkflowRunTool,
+    launchNovelWorkflowTool,
     launchStoryWorkflowTool,
   },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
